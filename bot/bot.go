@@ -2,11 +2,13 @@ package bot
 
 import (
 	telebot "gopkg.in/telebot.v3"
+	"telegrambot/internal"
 	"time"
 )
 
 type Bot struct {
-	bot *telebot.Bot
+	bot   *telebot.Bot
+	menus *internal.Menus
 }
 
 func NewBot(token string) (*Bot, error) {
@@ -17,8 +19,8 @@ func NewBot(token string) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return &Bot{bot: b}, nil
+	menus := internal.NewMenus()
+	return &Bot{bot: b, menus: menus}, nil
 }
 
 func (b *Bot) HandleCommand(command string, handler func(ctx telebot.Context)) {

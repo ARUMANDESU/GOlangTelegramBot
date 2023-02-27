@@ -17,3 +17,13 @@ func getPercentageResponse(p *float64, ctx telebot.Context, ch chan bool) {
 		return nil
 	})
 }
+
+func MapValue(value *float64, minNew, maxNew float64) {
+	switch {
+	case *value < minNew:
+		*value = minNew
+	case *value > maxNew:
+		*value = maxNew
+
+	}
+}

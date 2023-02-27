@@ -18,24 +18,32 @@ func (b *Bot) handleCalcRegCommand(ctx telebot.Context) {
 	getPercentageResponse(&snd, ctx, ch)
 
 	<-ch // Wait for user's response
-	finalScore := (70 - (fst*0.3 + snd*0.3)) / 0.4
+
+	firstAttestationScore := fst * 0.3
+	secondAttestationScore := snd * 0.3
+	finalScoreNeededForScholarship := (70 - (firstAttestationScore + secondAttestationScore)) / 0.4
+	finalScoreNeededForIncreasedScholarship := (90.5 - (firstAttestationScore + secondAttestationScore)) / 0.4
+	scoreIf100 := (fst+snd)*0.3 + 40
+
+	MapValue(&finalScoreNeededForScholarship, 50, 100)
+	MapValue(&finalScoreNeededForIncreasedScholarship, 50, 100)
+
 	if (fst+snd)/2 < 50 {
-		ctx.Send("GG  Retake")
+		ctx.Send("🔴 GG  Retake")
 		return
 	}
-	ctx.Send(fmt.Sprintf("🔴 Для сохранения стипендии   (>70)  \n %.2f%% на файнале. ", finalScore))
+
+	ctx.Send(fmt.Sprintf("🔴 Для сохранения стипендии (>70)  \n %.2f%% на файнале.", finalScoreNeededForScholarship))
+
+	if finalScoreNeededForIncreasedScholarship > 100 {
+		ctx.Send("🔵 Невозможно набрать 90> баллов.")
+	} else {
+		ctx.Send(fmt.Sprintf("🔵 Для получения повышенной стипендии (>90)  \n %.2f%% на файнале.", finalScoreNeededForIncreasedScholarship))
+	}
+
+	ctx.Send(fmt.Sprintf("⚪️ Если получишь на файнале 100 : \n %.2f%%.", scoreIf100))
 }
 
 func (b *Bot) handleStartCommand(ctx telebot.Context) {
-	var (
-		menu    = &telebot.ReplyMarkup{ResizeKeyboard: true}
-		btnHelp = menu.Text("Рассчитать нужное количество баллов на файнале")
-	)
-
-	menu.Reply(
-		menu.Row(btnHelp),
-	)
-
-	// send the welcome message with the reply markup
-	ctx.Send(fmt.Sprintf("Hello, %s! Welcome to my bot.", ctx.Sender().FirstName), menu)
+	ctx.Send(fmt.Sprintf("Hello, %s! Welcome to my bot.", ctx.Sender().FirstName), b.menus.HomeMenu)
 }
