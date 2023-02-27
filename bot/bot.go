@@ -2,8 +2,11 @@ package bot
 
 import (
 	telebot "gopkg.in/telebot.v3"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 	"telegrambot/internal"
-	"time"
 )
 
 type Bot struct {
@@ -12,9 +15,32 @@ type Bot struct {
 }
 
 func NewBot(token string) (*Bot, error) {
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("received webhook request: %v", r)
+	})
+	go http.ListenAndServe(":8080", nil)
+
+	webhook := &telebot.Webhook{
+		Listen:   "127.0.0.1:8443",
+		Endpoint: &telebot.WebhookEndpoint{PublicURL: os.Getenv("PUBLIC_URL")},
+	}
+
+	spamProtected := telebot.NewMiddlewarePoller(webhook, func(upd *telebot.Update) bool {
+		if upd.Message == nil {
+			return true
+		}
+
+		if strings.Contains(upd.Message.Text, "spam") {
+			return false
+		}
+
+		return true
+	})
+
 	b, err := telebot.NewBot(telebot.Settings{
 		Token:  token,
-		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
+		Poller: spamProtected,
 	})
 	if err != nil {
 		return nil, err
@@ -47,7 +73,7 @@ func (b *Bot) SendMessage(chatID int64, text string) error {
 func (b *Bot) AddHandlers() {
 
 	b.HandleCommand("/start", b.handleStartCommand)
-	b.HandleCommand("Рассчитать нужное количество баллов на файнале", b.handleCalcRegCommand)
+	b.HandleCommand("Рассчитать нужное количество баллов на файнале", b.handleCalcScoreCommand)
 	b.HandleMessage(func(ctx telebot.Context) {
 		b.SendMessage(ctx.Chat().ID, "I'm sorry, I don't understand.")
 	})
