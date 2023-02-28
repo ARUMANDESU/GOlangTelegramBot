@@ -5,7 +5,7 @@ import (
 	"gopkg.in/telebot.v3"
 )
 
-func (b *Bot) handleCalcScoreCommand(ctx telebot.Context) {
+func (b *Bot) handleCalcScoreCommand(ctx telebot.Context) error {
 	var fst, snd float64
 	ch := make(chan bool)
 
@@ -30,7 +30,7 @@ func (b *Bot) handleCalcScoreCommand(ctx telebot.Context) {
 
 	if (fst+snd)/2 < 50 {
 		ctx.Send("🔴 GG  Retake")
-		return
+		return nil
 	}
 
 	ctx.Send(fmt.Sprintf("🔴 Для сохранения стипендии (>70)  \n %.2f%% на файнале.", finalScoreNeededForScholarship))
@@ -43,10 +43,15 @@ func (b *Bot) handleCalcScoreCommand(ctx telebot.Context) {
 
 	ctx.Send(fmt.Sprintf("⚪️ Если получишь на файнале 100 : \n %.2f%%.", scoreIf100))
 
-	return
+	return nil
 }
 
-func (b *Bot) handleStartCommand(ctx telebot.Context) {
+func (b *Bot) handleStartCommand(ctx telebot.Context) error {
 	ctx.Send(fmt.Sprintf("Hello, %s! Welcome to my bot.", ctx.Sender().FirstName), b.menus.HomeMenu)
-	return
+	return nil
+}
+func (b *Bot) HandleHelpCommand(ctx telebot.Context) error {
+	ctx.Send(fmt.Sprintf("🤖 I can calculate you scores.\n"), b.menus.HelpMenu)
+
+	return nil
 }

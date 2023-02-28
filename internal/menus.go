@@ -4,12 +4,14 @@ import "gopkg.in/telebot.v3"
 
 type Menus struct {
 	HomeMenu *telebot.ReplyMarkup
+	HelpMenu *telebot.ReplyMarkup
 }
 
 func NewMenus() *Menus {
 	homeMenu := newHomeMenu()
+	helpMenu := newHelpMenu()
 
-	return &Menus{HomeMenu: homeMenu}
+	return &Menus{HomeMenu: homeMenu, HelpMenu: helpMenu}
 }
 
 func newHomeMenu() *telebot.ReplyMarkup {
@@ -21,4 +23,13 @@ func newHomeMenu() *telebot.ReplyMarkup {
 		homeMenu.Row(helpBtn),
 	)
 	return homeMenu
+}
+
+func newHelpMenu() *telebot.ReplyMarkup {
+	helpMenu := &telebot.ReplyMarkup{ResizeKeyboard: true}
+	calcScoreBtn := helpMenu.Text("Рассчитать нужное количество баллов на файнале")
+	helpMenu.Inline(
+		helpMenu.Row(calcScoreBtn),
+	)
+	return helpMenu
 }

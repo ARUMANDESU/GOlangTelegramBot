@@ -49,10 +49,9 @@ func NewBot(token string) (*Bot, error) {
 	return &Bot{bot: b, menus: menus}, nil
 }
 
-func (b *Bot) HandleCommand(command string, handler func(ctx telebot.Context)) {
+func (b *Bot) HandleCommand(command string, handler func(ctx telebot.Context) error) {
 	b.bot.Handle(command, func(ctx telebot.Context) error {
-		handler(ctx)
-		return nil
+		return handler(ctx)
 	})
 }
 
@@ -73,7 +72,9 @@ func (b *Bot) SendMessage(chatID int64, text string) error {
 func (b *Bot) AddHandlers() {
 
 	b.HandleCommand("/start", b.handleStartCommand)
+	b.HandleCommand("/help", b.HandleHelpCommand)
 	b.HandleCommand("Рассчитать нужное количество баллов на файнале", b.handleCalcScoreCommand)
+
 	b.HandleMessage(func(ctx telebot.Context) {
 		b.SendMessage(ctx.Chat().ID, "I'm sorry, I don't understand.")
 	})
